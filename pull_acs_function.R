@@ -45,4 +45,8 @@ acs_pull <- function(base, level, jurisdiction, year, span, delete) {
   gc() # optimizes memory usage
   temp_dt <- rbindlist(temp_dt_list) # create a master dt
   return(temp_dt)
+<<<<<<< HEAD:pull_acs_data.R
 }
+=======
+}
+>>>>>>> 7c280e8e5aa9f92597d16105d2b88dc0d2ca72e6:pull_acs_function.R
