@@ -1,6 +1,5 @@
 # download and merge 2016 5 year PUMS
 library(rvest)
-library(stringr)
 library(dplyr)
 library(data.table)
 library(bit64)
@@ -22,9 +21,8 @@ acs_pull <- function(base, level, jurisdiction, year, span, delete) {
   
   download.file(full_url, temp) # downloads zip file
   unzip(temp, exdir=tempd) # unzip the tempfile that is found in the temp directory
-  tempfiles <- list.files(path=tempd, pattern=".csv") %>% # filter so that the list on includes csv for that jurisdiction 
-    str_subset(pattern=paste0(substr(year, 3, 4), level, jurisdiction))
-  
+  tempfiles <- list.files(path=tempd, pattern=".csv") # filter so that the list on includes csv for that jurisdiction 
+    
   temp_dt_list <- list() # list to hold dts with all csvs
   for (f in tempfiles){ # loop through all files
     gc() # optimizes memory usage
@@ -45,4 +43,9 @@ acs_pull <- function(base, level, jurisdiction, year, span, delete) {
   gc() # optimizes memory usage
   temp_dt <- rbindlist(temp_dt_list) # create a master dt
   return(temp_dt)
+}
+
+acs_file_name <- function(folder, level, jurisdiction, year, span){
+  file_name <- paste0(folder,"level-",level,"_jur-",jurisdiction,"_yr-",year,"_span-",span,".csv")
+  return file_name
 }
