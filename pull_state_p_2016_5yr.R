@@ -1,12 +1,11 @@
 # download and merge 2016 5 year PUMS
 library(rvest)
-library(stringr)
 library(dplyr)
 library(data.table)
 library(bit64)
 
 setwd(Sys.getenv("ACS_DIR")) # set working directory
-source("pull_acs_function.R")
+source("pull_acs_function.R") # read in function
 
 # scrape the abbreviations for individual states
 webpage <- read_html("https://www2.census.gov/programs-surveys/acs/data/pums/2016/5-Year/")
@@ -25,7 +24,7 @@ dt_list <- list()  ## create empty list
 for (s in st_abr){ # loop through all states to create datatable
   dt_list[[s]] <- acs_pull(base="https://www2.census.gov/programs-surveys/acs/data/pums/",
                            level="p",
-                           jurisdiction="al",
+                           jurisdiction=s,
                            year="2016",
                            span="5",
                            delete=TRUE)
@@ -34,8 +33,12 @@ for (s in st_abr){ # loop through all states to create datatable
 
 # bind dataframes together
 dt <- rbindlist(dt_list)
-rm(c(dt_list,s)) # remove dataframe list
+rm(dt_list) # remove dataframe list
 
 # save data - create folder if needed
-dir.create(file.path("data"), showWarnings = FALSE)
-write.csv(dt, "data/state_p_2016_5yr.csv")
+file <- acs_file_name(folder="D:\\", level="p",
+              jurisdiction="states",
+              year="2016",
+              span="5")
+
+fwrite(dt, file)
