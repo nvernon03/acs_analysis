@@ -45,7 +45,8 @@ acs_pull <- function(base, level, jurisdiction, year, span, delete) {
   return(temp_dt)
 }
 
+# FUNCTION TO CREATE FILE NAME FOR THE DATASET
 acs_file_name <- function(folder, level, jurisdiction, year, span){
   file_name <- paste0(folder,"level-",level,"_jur-",jurisdiction,"_yr-",year,"_span-",span,".csv")
-  return file_name
+  return(file_name)
 }
