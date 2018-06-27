@@ -14,17 +14,19 @@ library(data.table)
 library(lazyeval)
 library(kableExtra)
 library(assertthat)
-
+library(knitr)
 
 #' ### Inputs
 #+ echo=TRUE, message=FALSE, warning=FALSE
 file_name <- "level-p_jur-us_yr-2016_span-1"
 file_folder <- "data"
 hrs_wk <- 20 # number of hours per week to exclude in analysis
-
+wd <- Sys.getenv("ACS_DIR") # working directory location
 
 #' ### Read in the data selected above
 #+ echo=TRUE, message=FALSE, warning=FALSE
+opts_knit$set(root.dir = wd)
+setwd(wd)
 dt_raw <- fread(paste0(file_folder, "/", file_name, ".csv")) # select dataset to use
 
 
@@ -61,8 +63,7 @@ dt <- mutate(dt, wht = ifelse(dt$racwht == 1 &
 ## new simplified race variable
 dt <- mutate(dt, race = ifelse(wht == 1, "white",
                                ifelse(easn == 1, "east_asian", 
-                                      ifelse(rac1p == 2, "afr_am", 
-                                             ifelse(wht == 0 & racwht == 1, "arab", "other")))))
+                                      ifelse(rac1p == 2, "afr_am", "other"))))
 
 race_coded <- as.data.table(dummy.code(dt$race))
 names(race_coded) <- paste("race", names(race_coded), sep = "_")
@@ -120,7 +121,13 @@ dt <- mutate(dt, military = as.numeric(mil != 4))
 ## recode sex dummy
 dt$sex <- ifelse(dt$sex==1, 0, 1)
 
+## log of wage variables
+log_cols <- c("intp", "wagp", "oip", "pap", "semp", "pincp")
+dt <- mutate_at(dt, setNames(log_cols, paste0("log_", log_cols)), log)
+
 
 #' ### Save dataset
 #+ echo=TRUE, message=FALSE, warning=TRUE
+opts_knit$set(root.dir = wd)
+setwd(wd)
 fwrite(dt, paste0(file_folder, "/processed_", file_name, ".csv"))
