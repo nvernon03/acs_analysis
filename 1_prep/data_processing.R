@@ -125,6 +125,14 @@ dt$sex <- ifelse(dt$sex==1, 0, 1)
 log_cols <- c("intp", "wagp", "oip", "pap", "semp", "pincp")
 dt <- mutate_at(dt, setNames(log_cols, paste0("log_", log_cols)), log)
 
+## wage per hours worked
+### absolute value - no log
+per_hr <- dt[log_cols] / dt$wkhp
+names(per_hr) <- paste("hr", names(per_hr), sep = "_")
+dt <- cbind(dt, per_hr)
+
+### logs
+dt <- mutate_at(dt, setNames(names(per_hr), paste0("log_", names(per_hr))), log)
 
 #' ### Save dataset
 #+ echo=TRUE, message=FALSE, warning=TRUE
