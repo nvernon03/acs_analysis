@@ -138,17 +138,21 @@ library(psych)
 library(data.table)
 library(lazyeval)
 library(kableExtra)
-library(assertthat)</code></pre>
+library(assertthat)
+library(knitr)</code></pre>
 </div>
 <div id="inputs" class="section level3">
 <h3>Inputs</h3>
 <pre class="r"><code>file_name &lt;- &quot;level-p_jur-us_yr-2016_span-1&quot;
 file_folder &lt;- &quot;data&quot;
-hrs_wk &lt;- 20 # number of hours per week to exclude in analysis</code></pre>
+hrs_wk &lt;- 20 # number of hours per week to exclude in analysis
+wd &lt;- Sys.getenv(&quot;ACS_DIR&quot;) # working directory location</code></pre>
 </div>
 <div id="read-in-the-data-selected-above" class="section level3">
 <h3>Read in the data selected above</h3>
-<pre class="r"><code>dt_raw &lt;- fread(paste0(file_folder, &quot;/&quot;, file_name, &quot;.csv&quot;)) # select dataset to use</code></pre>
+<pre class="r"><code>opts_knit$set(root.dir = wd)
+setwd(wd)
+dt_raw &lt;- fread(paste0(file_folder, &quot;/&quot;, file_name, &quot;.csv&quot;)) # select dataset to use</code></pre>
 </div>
 <div id="format-to-stata-variable-names-drop-some-variables" class="section level3">
 <h3>Format to Stata variable names; drop some variables</h3>
@@ -2880,28 +2884,27 @@ dt &lt;- mutate(dt, easn = as.numeric(rac3p %in% east_asia_code)) %&gt;%
 
 ## dummy for white
 dt &lt;- mutate(dt, wht = ifelse(dt$racwht == 1 &amp; 
-                                    ((dt$anc1p &lt; 400 | dt$anc1p &gt; 499) | 
-                                       (dt$anc2p &lt; 400 | dt$anc2p &gt; 499)), 1, 0))
+                                ((dt$anc1p &lt; 400 | dt$anc1p &gt; 499) | 
+                                   (dt$anc2p &lt; 400 | dt$anc2p &gt; 499)), 1, 0))
 ## new simplified race variable
 dt &lt;- mutate(dt, race = ifelse(wht == 1, &quot;white&quot;,
                                ifelse(easn == 1, &quot;east_asian&quot;, 
-                                      ifelse(rac1p == 2, &quot;afr_am&quot;, 
-                                             ifelse(wht == 0 &amp; racwht == 1, &quot;arab&quot;, &quot;other&quot;)))))
+                                      ifelse(rac1p == 2, &quot;afr_am&quot;, &quot;other&quot;))))
 
 race_coded &lt;- as.data.table(dummy.code(dt$race))
 names(race_coded) &lt;- paste(&quot;race&quot;, names(race_coded), sep = &quot;_&quot;)
 dt &lt;- cbind(dt, race_coded)</code></pre>
 <pre class="r"><code>table(dt$race) # show frequency of variable</code></pre>
 <pre><code>## 
-##     afr_am       arab east_asian      other      white 
-##     139402        450      30994     130772    1180103</code></pre>
+##     afr_am east_asian      other      white 
+##     139402      30994     131222    1180103</code></pre>
 <pre class="r"><code>## school coded variable
 dt &lt;- mutate(dt, deg = ifelse(dt$schl &lt;= 15, &quot;no_hs&quot;,
-       ifelse(dt$schl &lt;= 19, &quot;hs&quot;,
-              ifelse(dt$schl &lt;= 20, &quot;associate&quot;,
-                     ifelse(dt$schl &lt;= 21, &quot;bach&quot;,
-                            ifelse(dt$schl &lt;= 23, &quot;master&quot;,
-                                   ifelse(dt$schl &lt;= 24, &quot;doctorate&quot;)))))))
+                              ifelse(dt$schl &lt;= 19, &quot;hs&quot;,
+                                     ifelse(dt$schl &lt;= 20, &quot;associate&quot;,
+                                            ifelse(dt$schl &lt;= 21, &quot;bach&quot;,
+                                                   ifelse(dt$schl &lt;= 23, &quot;master&quot;,
+                                                          ifelse(dt$schl &lt;= 24, &quot;doctorate&quot;)))))))
 
 deg_coded &lt;- as.data.table(dummy.code(dt$deg))
 names(deg_coded) &lt;- paste(&quot;deg&quot;, names(deg_coded), sep = &quot;_&quot;)
@@ -2912,12 +2915,12 @@ dt &lt;- cbind(dt, deg_coded)</code></pre>
 ##    136598    323412     23718    696808    176430    124755</code></pre>
 <pre class="r"><code>## create experience variable
 dt &lt;- mutate(dt, schl_yrs = ifelse(dt$schl &lt;= 3, 0,
-                    ifelse(dt$schl &lt;= 15, dt$schl - 3,
-                          ifelse(dt$schl &lt;= 18, 12,
-                                 ifelse(dt$schl &lt;= 20, 14,
-                                      ifelse(dt$schl &lt;= 21, 16,
-                                             ifelse(dt$schl &lt;= 23, 18,
-                                                    ifelse(dt$schl &lt;= 24, 23))))))))
+                                   ifelse(dt$schl &lt;= 15, dt$schl - 3,
+                                          ifelse(dt$schl &lt;= 18, 12,
+                                                 ifelse(dt$schl &lt;= 20, 14,
+                                                        ifelse(dt$schl &lt;= 21, 16,
+                                                               ifelse(dt$schl &lt;= 23, 18,
+                                                                      ifelse(dt$schl &lt;= 24, 23))))))))
 dt &lt;- mutate(dt, exp = agep - 5 - schl_yrs) %&gt;%
   mutate(exp2 = exp*exp)</code></pre>
 <pre class="r"><code>kable(describe(dt[, c('exp', 'schl_yrs')]), digits=3) %&gt;% # show summary stats of variables
@@ -3069,12 +3072,4691 @@ dt &lt;- mutate(dt, married = as.numeric(mar==1))
 dt &lt;- mutate(dt, military = as.numeric(mil != 4))
 
 ## recode sex dummy
-dt$sex &lt;- ifelse(dt$sex==1, 0, 1)</code></pre>
+dt$sex &lt;- ifelse(dt$sex==1, 0, 1)
+
+## log of wage variables
+log_cols &lt;- c(&quot;intp&quot;, &quot;wagp&quot;, &quot;oip&quot;, &quot;pap&quot;, &quot;semp&quot;, &quot;pincp&quot;)
+dt &lt;- mutate_at(dt, setNames(log_cols, paste0(&quot;log_&quot;, log_cols)), log)
+
+## wage per hours worked
+### absolute value - no log
+per_hr &lt;- dt[log_cols] / dt$wkhp
+names(per_hr) &lt;- paste(&quot;hr&quot;, names(per_hr), sep = &quot;_&quot;)
+dt &lt;- cbind(dt, per_hr)
+
+### logs
+dt &lt;- mutate_at(dt, setNames(names(per_hr), paste0(&quot;log_&quot;, names(per_hr))), log)
+
+## state level dummies
+state_coded &lt;- as.data.table(dummy.code(dt$st))
+names(state_coded) &lt;- paste(&quot;deg&quot;, names(state_coded), sep = &quot;_&quot;)
+dt &lt;- cbind(dt, state_coded)</code></pre>
+</div>
+</div>
+<div id="print-variable-names" class="section level3">
+<h3>Print variable names</h3>
+<pre class="r"><code>print(names(dt))</code></pre>
+<pre><code>##   [1] &quot;rt&quot;              &quot;serialno&quot;        &quot;sporder&quot;        
+##   [4] &quot;puma&quot;            &quot;st&quot;              &quot;adjinc&quot;         
+##   [7] &quot;agep&quot;            &quot;cit&quot;             &quot;citwp&quot;          
+##  [10] &quot;cow&quot;             &quot;ddrs&quot;            &quot;dear&quot;           
+##  [13] &quot;deye&quot;            &quot;dout&quot;            &quot;dphy&quot;           
+##  [16] &quot;drat&quot;            &quot;dratx&quot;           &quot;drem&quot;           
+##  [19] &quot;eng&quot;             &quot;fer&quot;             &quot;gcl&quot;            
+##  [22] &quot;gcm&quot;             &quot;gcr&quot;             &quot;hins1&quot;          
+##  [25] &quot;hins2&quot;           &quot;hins3&quot;           &quot;hins4&quot;          
+##  [28] &quot;hins5&quot;           &quot;hins6&quot;           &quot;hins7&quot;          
+##  [31] &quot;intp&quot;            &quot;jwmnp&quot;           &quot;jwrip&quot;          
+##  [34] &quot;jwtr&quot;            &quot;lanp&quot;            &quot;lanx&quot;           
+##  [37] &quot;mar&quot;             &quot;marhd&quot;           &quot;marhm&quot;          
+##  [40] &quot;marht&quot;           &quot;marhw&quot;           &quot;marhyp&quot;         
+##  [43] &quot;mig&quot;             &quot;mil&quot;             &quot;mlpa&quot;           
+##  [46] &quot;mlpb&quot;            &quot;mlpcd&quot;           &quot;mlpe&quot;           
+##  [49] &quot;mlpfg&quot;           &quot;mlph&quot;            &quot;mlpi&quot;           
+##  [52] &quot;mlpj&quot;            &quot;mlpk&quot;            &quot;nwab&quot;           
+##  [55] &quot;nwav&quot;            &quot;nwla&quot;            &quot;nwlk&quot;           
+##  [58] &quot;nwre&quot;            &quot;oip&quot;             &quot;pap&quot;            
+##  [61] &quot;relp&quot;            &quot;retp&quot;            &quot;sch&quot;            
+##  [64] &quot;schg&quot;            &quot;schl&quot;            &quot;semp&quot;           
+##  [67] &quot;sex&quot;             &quot;ssip&quot;            &quot;ssp&quot;            
+##  [70] &quot;wagp&quot;            &quot;wkhp&quot;            &quot;wkl&quot;            
+##  [73] &quot;wkw&quot;             &quot;wrk&quot;             &quot;yoep&quot;           
+##  [76] &quot;anc&quot;             &quot;anc1p&quot;           &quot;anc2p&quot;          
+##  [79] &quot;decade&quot;          &quot;dis&quot;             &quot;drivesp&quot;        
+##  [82] &quot;esp&quot;             &quot;esr&quot;             &quot;hicov&quot;          
+##  [85] &quot;hisp&quot;            &quot;indp&quot;            &quot;jwap&quot;           
+##  [88] &quot;jwdp&quot;            &quot;migpuma&quot;         &quot;migsp&quot;          
+##  [91] &quot;msp&quot;             &quot;naicsp&quot;          &quot;nativity&quot;       
+##  [94] &quot;nop&quot;             &quot;oc&quot;              &quot;occp&quot;           
+##  [97] &quot;paoc&quot;            &quot;pernp&quot;           &quot;pincp&quot;          
+## [100] &quot;pobp&quot;            &quot;povpip&quot;          &quot;powpuma&quot;        
+## [103] &quot;powsp&quot;           &quot;privcov&quot;         &quot;pubcov&quot;         
+## [106] &quot;qtrbir&quot;          &quot;rac1p&quot;           &quot;rac2p&quot;          
+## [109] &quot;rac3p&quot;           &quot;racaian&quot;         &quot;racasn&quot;         
+## [112] &quot;racblk&quot;          &quot;racnh&quot;           &quot;racnum&quot;         
+## [115] &quot;racpi&quot;           &quot;racsor&quot;          &quot;racwht&quot;         
+## [118] &quot;rc&quot;              &quot;sciengp&quot;         &quot;sciengrlp&quot;      
+## [121] &quot;sfn&quot;             &quot;sfr&quot;             &quot;socp&quot;           
+## [124] &quot;vps&quot;             &quot;waob&quot;            &quot;fhins3c&quot;        
+## [127] &quot;fhins4c&quot;         &quot;fhins5c&quot;         &quot;easn&quot;           
+## [130] &quot;asn&quot;             &quot;wht&quot;             &quot;race&quot;           
+## [133] &quot;race_afr_am&quot;     &quot;race_east_asian&quot; &quot;race_other&quot;     
+## [136] &quot;race_white&quot;      &quot;deg&quot;             &quot;deg_associate&quot;  
+## [139] &quot;deg_bach&quot;        &quot;deg_doctorate&quot;   &quot;deg_hs&quot;         
+## [142] &quot;deg_master&quot;      &quot;deg_no_hs&quot;       &quot;schl_yrs&quot;       
+## [145] &quot;exp&quot;             &quot;exp2&quot;            &quot;married&quot;        
+## [148] &quot;military&quot;        &quot;log_intp&quot;        &quot;log_wagp&quot;       
+## [151] &quot;log_oip&quot;         &quot;log_pap&quot;         &quot;log_semp&quot;       
+## [154] &quot;log_pincp&quot;       &quot;hr_intp&quot;         &quot;hr_wagp&quot;        
+## [157] &quot;hr_oip&quot;          &quot;hr_pap&quot;          &quot;hr_semp&quot;        
+## [160] &quot;hr_pincp&quot;        &quot;log_hr_intp&quot;     &quot;log_hr_wagp&quot;    
+## [163] &quot;log_hr_oip&quot;      &quot;log_hr_pap&quot;      &quot;log_hr_semp&quot;    
+## [166] &quot;log_hr_pincp&quot;    &quot;deg_1&quot;           &quot;deg_2&quot;          
+## [169] &quot;deg_4&quot;           &quot;deg_5&quot;           &quot;deg_6&quot;          
+## [172] &quot;deg_8&quot;           &quot;deg_9&quot;           &quot;deg_10&quot;         
+## [175] &quot;deg_11&quot;          &quot;deg_12&quot;          &quot;deg_13&quot;         
+## [178] &quot;deg_15&quot;          &quot;deg_16&quot;          &quot;deg_17&quot;         
+## [181] &quot;deg_18&quot;          &quot;deg_19&quot;          &quot;deg_20&quot;         
+## [184] &quot;deg_21&quot;          &quot;deg_22&quot;          &quot;deg_23&quot;         
+## [187] &quot;deg_24&quot;          &quot;deg_25&quot;          &quot;deg_26&quot;         
+## [190] &quot;deg_27&quot;          &quot;deg_28&quot;          &quot;deg_29&quot;         
+## [193] &quot;deg_30&quot;          &quot;deg_31&quot;          &quot;deg_32&quot;         
+## [196] &quot;deg_33&quot;          &quot;deg_34&quot;          &quot;deg_35&quot;         
+## [199] &quot;deg_36&quot;          &quot;deg_37&quot;          &quot;deg_38&quot;         
+## [202] &quot;deg_39&quot;          &quot;deg_40&quot;          &quot;deg_41&quot;         
+## [205] &quot;deg_42&quot;          &quot;deg_44&quot;          &quot;deg_45&quot;         
+## [208] &quot;deg_46&quot;          &quot;deg_47&quot;          &quot;deg_48&quot;         
+## [211] &quot;deg_49&quot;          &quot;deg_50&quot;          &quot;deg_51&quot;         
+## [214] &quot;deg_53&quot;          &quot;deg_54&quot;          &quot;deg_55&quot;         
+## [217] &quot;deg_56&quot;</code></pre>
+<pre class="r"><code>kable(head(dt)) %&gt;%
+  kable_styling() %&gt;%
+  scroll_box(width = &quot;100%&quot;)</code></pre>
+<div style="border: 1px solid #ddd; padding: 5px; overflow-x: scroll; width:100%; ">
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+rt
+</th>
+<th style="text-align:right;">
+serialno
+</th>
+<th style="text-align:right;">
+sporder
+</th>
+<th style="text-align:right;">
+puma
+</th>
+<th style="text-align:right;">
+st
+</th>
+<th style="text-align:right;">
+adjinc
+</th>
+<th style="text-align:right;">
+agep
+</th>
+<th style="text-align:right;">
+cit
+</th>
+<th style="text-align:right;">
+citwp
+</th>
+<th style="text-align:right;">
+cow
+</th>
+<th style="text-align:right;">
+ddrs
+</th>
+<th style="text-align:right;">
+dear
+</th>
+<th style="text-align:right;">
+deye
+</th>
+<th style="text-align:right;">
+dout
+</th>
+<th style="text-align:right;">
+dphy
+</th>
+<th style="text-align:right;">
+drat
+</th>
+<th style="text-align:right;">
+dratx
+</th>
+<th style="text-align:right;">
+drem
+</th>
+<th style="text-align:right;">
+eng
+</th>
+<th style="text-align:right;">
+fer
+</th>
+<th style="text-align:right;">
+gcl
+</th>
+<th style="text-align:right;">
+gcm
+</th>
+<th style="text-align:right;">
+gcr
+</th>
+<th style="text-align:right;">
+hins1
+</th>
+<th style="text-align:right;">
+hins2
+</th>
+<th style="text-align:right;">
+hins3
+</th>
+<th style="text-align:right;">
+hins4
+</th>
+<th style="text-align:right;">
+hins5
+</th>
+<th style="text-align:right;">
+hins6
+</th>
+<th style="text-align:right;">
+hins7
+</th>
+<th style="text-align:right;">
+intp
+</th>
+<th style="text-align:right;">
+jwmnp
+</th>
+<th style="text-align:right;">
+jwrip
+</th>
+<th style="text-align:right;">
+jwtr
+</th>
+<th style="text-align:right;">
+lanp
+</th>
+<th style="text-align:right;">
+lanx
+</th>
+<th style="text-align:right;">
+mar
+</th>
+<th style="text-align:right;">
+marhd
+</th>
+<th style="text-align:right;">
+marhm
+</th>
+<th style="text-align:right;">
+marht
+</th>
+<th style="text-align:right;">
+marhw
+</th>
+<th style="text-align:right;">
+marhyp
+</th>
+<th style="text-align:right;">
+mig
+</th>
+<th style="text-align:right;">
+mil
+</th>
+<th style="text-align:right;">
+mlpa
+</th>
+<th style="text-align:right;">
+mlpb
+</th>
+<th style="text-align:right;">
+mlpcd
+</th>
+<th style="text-align:right;">
+mlpe
+</th>
+<th style="text-align:right;">
+mlpfg
+</th>
+<th style="text-align:right;">
+mlph
+</th>
+<th style="text-align:right;">
+mlpi
+</th>
+<th style="text-align:right;">
+mlpj
+</th>
+<th style="text-align:right;">
+mlpk
+</th>
+<th style="text-align:right;">
+nwab
+</th>
+<th style="text-align:right;">
+nwav
+</th>
+<th style="text-align:right;">
+nwla
+</th>
+<th style="text-align:right;">
+nwlk
+</th>
+<th style="text-align:right;">
+nwre
+</th>
+<th style="text-align:right;">
+oip
+</th>
+<th style="text-align:right;">
+pap
+</th>
+<th style="text-align:right;">
+relp
+</th>
+<th style="text-align:right;">
+retp
+</th>
+<th style="text-align:right;">
+sch
+</th>
+<th style="text-align:right;">
+schg
+</th>
+<th style="text-align:right;">
+schl
+</th>
+<th style="text-align:right;">
+semp
+</th>
+<th style="text-align:right;">
+sex
+</th>
+<th style="text-align:right;">
+ssip
+</th>
+<th style="text-align:right;">
+ssp
+</th>
+<th style="text-align:right;">
+wagp
+</th>
+<th style="text-align:right;">
+wkhp
+</th>
+<th style="text-align:right;">
+wkl
+</th>
+<th style="text-align:right;">
+wkw
+</th>
+<th style="text-align:right;">
+wrk
+</th>
+<th style="text-align:right;">
+yoep
+</th>
+<th style="text-align:right;">
+anc
+</th>
+<th style="text-align:right;">
+anc1p
+</th>
+<th style="text-align:right;">
+anc2p
+</th>
+<th style="text-align:right;">
+decade
+</th>
+<th style="text-align:right;">
+dis
+</th>
+<th style="text-align:right;">
+drivesp
+</th>
+<th style="text-align:right;">
+esp
+</th>
+<th style="text-align:right;">
+esr
+</th>
+<th style="text-align:right;">
+hicov
+</th>
+<th style="text-align:right;">
+hisp
+</th>
+<th style="text-align:right;">
+indp
+</th>
+<th style="text-align:right;">
+jwap
+</th>
+<th style="text-align:right;">
+jwdp
+</th>
+<th style="text-align:right;">
+migpuma
+</th>
+<th style="text-align:right;">
+migsp
+</th>
+<th style="text-align:right;">
+msp
+</th>
+<th style="text-align:left;">
+naicsp
+</th>
+<th style="text-align:right;">
+nativity
+</th>
+<th style="text-align:right;">
+nop
+</th>
+<th style="text-align:right;">
+oc
+</th>
+<th style="text-align:right;">
+occp
+</th>
+<th style="text-align:right;">
+paoc
+</th>
+<th style="text-align:right;">
+pernp
+</th>
+<th style="text-align:right;">
+pincp
+</th>
+<th style="text-align:right;">
+pobp
+</th>
+<th style="text-align:right;">
+povpip
+</th>
+<th style="text-align:right;">
+powpuma
+</th>
+<th style="text-align:right;">
+powsp
+</th>
+<th style="text-align:right;">
+privcov
+</th>
+<th style="text-align:right;">
+pubcov
+</th>
+<th style="text-align:right;">
+qtrbir
+</th>
+<th style="text-align:right;">
+rac1p
+</th>
+<th style="text-align:right;">
+rac2p
+</th>
+<th style="text-align:right;">
+rac3p
+</th>
+<th style="text-align:right;">
+racaian
+</th>
+<th style="text-align:right;">
+racasn
+</th>
+<th style="text-align:right;">
+racblk
+</th>
+<th style="text-align:right;">
+racnh
+</th>
+<th style="text-align:right;">
+racnum
+</th>
+<th style="text-align:right;">
+racpi
+</th>
+<th style="text-align:right;">
+racsor
+</th>
+<th style="text-align:right;">
+racwht
+</th>
+<th style="text-align:right;">
+rc
+</th>
+<th style="text-align:right;">
+sciengp
+</th>
+<th style="text-align:right;">
+sciengrlp
+</th>
+<th style="text-align:right;">
+sfn
+</th>
+<th style="text-align:right;">
+sfr
+</th>
+<th style="text-align:left;">
+socp
+</th>
+<th style="text-align:right;">
+vps
+</th>
+<th style="text-align:right;">
+waob
+</th>
+<th style="text-align:right;">
+fhins3c
+</th>
+<th style="text-align:right;">
+fhins4c
+</th>
+<th style="text-align:right;">
+fhins5c
+</th>
+<th style="text-align:right;">
+easn
+</th>
+<th style="text-align:right;">
+asn
+</th>
+<th style="text-align:right;">
+wht
+</th>
+<th style="text-align:left;">
+race
+</th>
+<th style="text-align:right;">
+race_afr_am
+</th>
+<th style="text-align:right;">
+race_east_asian
+</th>
+<th style="text-align:right;">
+race_other
+</th>
+<th style="text-align:right;">
+race_white
+</th>
+<th style="text-align:left;">
+deg
+</th>
+<th style="text-align:right;">
+deg_associate
+</th>
+<th style="text-align:right;">
+deg_bach
+</th>
+<th style="text-align:right;">
+deg_doctorate
+</th>
+<th style="text-align:right;">
+deg_hs
+</th>
+<th style="text-align:right;">
+deg_master
+</th>
+<th style="text-align:right;">
+deg_no_hs
+</th>
+<th style="text-align:right;">
+schl_yrs
+</th>
+<th style="text-align:right;">
+exp
+</th>
+<th style="text-align:right;">
+exp2
+</th>
+<th style="text-align:right;">
+married
+</th>
+<th style="text-align:right;">
+military
+</th>
+<th style="text-align:right;">
+log_intp
+</th>
+<th style="text-align:right;">
+log_wagp
+</th>
+<th style="text-align:right;">
+log_oip
+</th>
+<th style="text-align:right;">
+log_pap
+</th>
+<th style="text-align:right;">
+log_semp
+</th>
+<th style="text-align:right;">
+log_pincp
+</th>
+<th style="text-align:right;">
+hr_intp
+</th>
+<th style="text-align:right;">
+hr_wagp
+</th>
+<th style="text-align:right;">
+hr_oip
+</th>
+<th style="text-align:right;">
+hr_pap
+</th>
+<th style="text-align:right;">
+hr_semp
+</th>
+<th style="text-align:right;">
+hr_pincp
+</th>
+<th style="text-align:right;">
+log_hr_intp
+</th>
+<th style="text-align:right;">
+log_hr_wagp
+</th>
+<th style="text-align:right;">
+log_hr_oip
+</th>
+<th style="text-align:right;">
+log_hr_pap
+</th>
+<th style="text-align:right;">
+log_hr_semp
+</th>
+<th style="text-align:right;">
+log_hr_pincp
+</th>
+<th style="text-align:right;">
+deg_1
+</th>
+<th style="text-align:right;">
+deg_2
+</th>
+<th style="text-align:right;">
+deg_4
+</th>
+<th style="text-align:right;">
+deg_5
+</th>
+<th style="text-align:right;">
+deg_6
+</th>
+<th style="text-align:right;">
+deg_8
+</th>
+<th style="text-align:right;">
+deg_9
+</th>
+<th style="text-align:right;">
+deg_10
+</th>
+<th style="text-align:right;">
+deg_11
+</th>
+<th style="text-align:right;">
+deg_12
+</th>
+<th style="text-align:right;">
+deg_13
+</th>
+<th style="text-align:right;">
+deg_15
+</th>
+<th style="text-align:right;">
+deg_16
+</th>
+<th style="text-align:right;">
+deg_17
+</th>
+<th style="text-align:right;">
+deg_18
+</th>
+<th style="text-align:right;">
+deg_19
+</th>
+<th style="text-align:right;">
+deg_20
+</th>
+<th style="text-align:right;">
+deg_21
+</th>
+<th style="text-align:right;">
+deg_22
+</th>
+<th style="text-align:right;">
+deg_23
+</th>
+<th style="text-align:right;">
+deg_24
+</th>
+<th style="text-align:right;">
+deg_25
+</th>
+<th style="text-align:right;">
+deg_26
+</th>
+<th style="text-align:right;">
+deg_27
+</th>
+<th style="text-align:right;">
+deg_28
+</th>
+<th style="text-align:right;">
+deg_29
+</th>
+<th style="text-align:right;">
+deg_30
+</th>
+<th style="text-align:right;">
+deg_31
+</th>
+<th style="text-align:right;">
+deg_32
+</th>
+<th style="text-align:right;">
+deg_33
+</th>
+<th style="text-align:right;">
+deg_34
+</th>
+<th style="text-align:right;">
+deg_35
+</th>
+<th style="text-align:right;">
+deg_36
+</th>
+<th style="text-align:right;">
+deg_37
+</th>
+<th style="text-align:right;">
+deg_38
+</th>
+<th style="text-align:right;">
+deg_39
+</th>
+<th style="text-align:right;">
+deg_40
+</th>
+<th style="text-align:right;">
+deg_41
+</th>
+<th style="text-align:right;">
+deg_42
+</th>
+<th style="text-align:right;">
+deg_44
+</th>
+<th style="text-align:right;">
+deg_45
+</th>
+<th style="text-align:right;">
+deg_46
+</th>
+<th style="text-align:right;">
+deg_47
+</th>
+<th style="text-align:right;">
+deg_48
+</th>
+<th style="text-align:right;">
+deg_49
+</th>
+<th style="text-align:right;">
+deg_50
+</th>
+<th style="text-align:right;">
+deg_51
+</th>
+<th style="text-align:right;">
+deg_53
+</th>
+<th style="text-align:right;">
+deg_54
+</th>
+<th style="text-align:right;">
+deg_55
+</th>
+<th style="text-align:right;">
+deg_56
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+P
+</td>
+<td style="text-align:right;">
+80
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+900
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1007588
+</td>
+<td style="text-align:right;">
+78
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+50
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1994
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+18500
+</td>
+<td style="text-align:right;">
+27300
+</td>
+<td style="text-align:right;">
+40
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+999
+</td>
+<td style="text-align:right;">
+999
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+8190
+</td>
+<td style="text-align:right;">
+86
+</td>
+<td style="text-align:right;">
+37
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:left;">
+622
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+5700
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+27300
+</td>
+<td style="text-align:right;">
+45800
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+402
+</td>
+<td style="text-align:right;">
+900
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+436010
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+white
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+hs
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+59
+</td>
+<td style="text-align:right;">
+3481
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+10.214642
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+10.732039
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+682.5
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1145.0
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+6.525762
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+7.043160
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+P
+</td>
+<td style="text-align:right;">
+107
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+302
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1007588
+</td>
+<td style="text-align:right;">
+46
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1994
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+65000
+</td>
+<td style="text-align:right;">
+40
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+939
+</td>
+<td style="text-align:right;">
+999
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+7290
+</td>
+<td style="text-align:right;">
+80
+</td>
+<td style="text-align:right;">
+37
+</td>
+<td style="text-align:right;">
+290
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+5413
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1550
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+65000
+</td>
+<td style="text-align:right;">
+65000
+</td>
+<td style="text-align:right;">
+27
+</td>
+<td style="text-align:right;">
+261
+</td>
+<td style="text-align:right;">
+290
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+173020
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+white
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+associate
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+27
+</td>
+<td style="text-align:right;">
+729
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+11.082142
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+11.082142
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1625.0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1625.0
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+7.393263
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+7.393263
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+P
+</td>
+<td style="text-align:right;">
+180
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2500
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1007588
+</td>
+<td style="text-align:right;">
+64
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+4000
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1975
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+78000
+</td>
+<td style="text-align:right;">
+40
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+999
+</td>
+<td style="text-align:right;">
+999
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+770
+</td>
+<td style="text-align:right;">
+91
+</td>
+<td style="text-align:right;">
+49
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+23
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+6200
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+78000
+</td>
+<td style="text-align:right;">
+82000
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+501
+</td>
+<td style="text-align:right;">
+2500
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+471011
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+white
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+hs
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
+2209
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+8.29405
+</td>
+<td style="text-align:right;">
+11.264464
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+11.314474
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+1950.0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2050.0
+</td>
+<td style="text-align:right;">
+4.60517
+</td>
+<td style="text-align:right;">
+7.575585
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+7.625595
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+P
+</td>
+<td style="text-align:right;">
+300
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2702
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1007588
+</td>
+<td style="text-align:right;">
+25
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+19200
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+999
+</td>
+<td style="text-align:right;">
+999
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+8190
+</td>
+<td style="text-align:right;">
+211
+</td>
+<td style="text-align:right;">
+124
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+622
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3600
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+19200
+</td>
+<td style="text-align:right;">
+19200
+</td>
+<td style="text-align:right;">
+22
+</td>
+<td style="text-align:right;">
+154
+</td>
+<td style="text-align:right;">
+2700
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+311010
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+white
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+hs
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+9.862666
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+9.862666
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+800.0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+800.0
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+6.684612
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+6.684612
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+P
+</td>
+<td style="text-align:right;">
+300
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2702
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1007588
+</td>
+<td style="text-align:right;">
+23
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+19100
+</td>
+<td style="text-align:right;">
+40
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+999
+</td>
+<td style="text-align:right;">
+999
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+7980
+</td>
+<td style="text-align:right;">
+78
+</td>
+<td style="text-align:right;">
+37
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+6212
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3640
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+19100
+</td>
+<td style="text-align:right;">
+19100
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+153
+</td>
+<td style="text-align:right;">
+2700
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+319091
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+white
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+associate
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+9.857444
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+9.857444
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+477.5
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+477.5
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+6.168564
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+6.168564
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+P
+</td>
+<td style="text-align:right;">
+313
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2500
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1007588
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2008
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+35000
+</td>
+<td style="text-align:right;">
+40
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+940
+</td>
+<td style="text-align:right;">
+999
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+7860
+</td>
+<td style="text-align:right;">
+85
+</td>
+<td style="text-align:right;">
+43
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:left;">
+6111
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2310
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+35000
+</td>
+<td style="text-align:right;">
+35000
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+282
+</td>
+<td style="text-align:right;">
+2500
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+252020
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+white
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+bach
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+196
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+10.463103
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+10.463103
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+875.0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+875.0
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+6.774224
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+6.774224
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 <div id="save-dataset" class="section level3">
 <h3>Save dataset</h3>
-<pre class="r"><code>fwrite(dt, paste0(file_folder, &quot;/processed_&quot;, file_name, &quot;.csv&quot;))</code></pre>
+<pre class="r"><code>opts_knit$set(root.dir = wd)
+setwd(wd)
+fwrite(dt, paste0(file_folder, &quot;/processed_&quot;, file_name, &quot;.csv&quot;))</code></pre>
 </div>
 
 

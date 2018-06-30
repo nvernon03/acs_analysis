@@ -134,6 +134,21 @@ dt <- cbind(dt, per_hr)
 ### logs
 dt <- mutate_at(dt, setNames(names(per_hr), paste0("log_", names(per_hr))), log)
 
+## state level dummies
+state_coded <- as.data.table(dummy.code(dt$st))
+names(state_coded) <- paste("deg", names(state_coded), sep = "_")
+dt <- cbind(dt, state_coded)
+
+#' ### Print variable names
+#+ echo=TRUE, message=FALSE, warning=TRUE
+print(names(dt))
+
+kable(head(dt)) %>%
+  kable_styling() %>%
+  scroll_box(width = "100%")
+
+
+
 #' ### Save dataset
 #+ echo=TRUE, message=FALSE, warning=TRUE
 opts_knit$set(root.dir = wd)
