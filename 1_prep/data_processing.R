@@ -136,7 +136,7 @@ dt <- mutate_at(dt, setNames(names(per_hr), paste0("log_", names(per_hr))), log)
 
 ## state level dummies
 state_coded <- as.data.table(dummy.code(dt$st))
-names(state_coded) <- paste("deg", names(state_coded), sep = "_")
+names(state_coded) <- paste("state", names(state_coded), sep = "_")
 dt <- cbind(dt, state_coded)
 
 #' ### Print variable names

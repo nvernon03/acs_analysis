@@ -3089,7 +3089,7 @@ dt &lt;- mutate_at(dt, setNames(names(per_hr), paste0(&quot;log_&quot;, names(pe
 
 ## state level dummies
 state_coded &lt;- as.data.table(dummy.code(dt$st))
-names(state_coded) &lt;- paste(&quot;deg&quot;, names(state_coded), sep = &quot;_&quot;)
+names(state_coded) &lt;- paste(&quot;state&quot;, names(state_coded), sep = &quot;_&quot;)
 dt &lt;- cbind(dt, state_coded)</code></pre>
 </div>
 </div>
@@ -3151,24 +3151,24 @@ dt &lt;- cbind(dt, state_coded)</code></pre>
 ## [157] &quot;hr_oip&quot;          &quot;hr_pap&quot;          &quot;hr_semp&quot;        
 ## [160] &quot;hr_pincp&quot;        &quot;log_hr_intp&quot;     &quot;log_hr_wagp&quot;    
 ## [163] &quot;log_hr_oip&quot;      &quot;log_hr_pap&quot;      &quot;log_hr_semp&quot;    
-## [166] &quot;log_hr_pincp&quot;    &quot;deg_1&quot;           &quot;deg_2&quot;          
-## [169] &quot;deg_4&quot;           &quot;deg_5&quot;           &quot;deg_6&quot;          
-## [172] &quot;deg_8&quot;           &quot;deg_9&quot;           &quot;deg_10&quot;         
-## [175] &quot;deg_11&quot;          &quot;deg_12&quot;          &quot;deg_13&quot;         
-## [178] &quot;deg_15&quot;          &quot;deg_16&quot;          &quot;deg_17&quot;         
-## [181] &quot;deg_18&quot;          &quot;deg_19&quot;          &quot;deg_20&quot;         
-## [184] &quot;deg_21&quot;          &quot;deg_22&quot;          &quot;deg_23&quot;         
-## [187] &quot;deg_24&quot;          &quot;deg_25&quot;          &quot;deg_26&quot;         
-## [190] &quot;deg_27&quot;          &quot;deg_28&quot;          &quot;deg_29&quot;         
-## [193] &quot;deg_30&quot;          &quot;deg_31&quot;          &quot;deg_32&quot;         
-## [196] &quot;deg_33&quot;          &quot;deg_34&quot;          &quot;deg_35&quot;         
-## [199] &quot;deg_36&quot;          &quot;deg_37&quot;          &quot;deg_38&quot;         
-## [202] &quot;deg_39&quot;          &quot;deg_40&quot;          &quot;deg_41&quot;         
-## [205] &quot;deg_42&quot;          &quot;deg_44&quot;          &quot;deg_45&quot;         
-## [208] &quot;deg_46&quot;          &quot;deg_47&quot;          &quot;deg_48&quot;         
-## [211] &quot;deg_49&quot;          &quot;deg_50&quot;          &quot;deg_51&quot;         
-## [214] &quot;deg_53&quot;          &quot;deg_54&quot;          &quot;deg_55&quot;         
-## [217] &quot;deg_56&quot;</code></pre>
+## [166] &quot;log_hr_pincp&quot;    &quot;state_1&quot;         &quot;state_2&quot;        
+## [169] &quot;state_4&quot;         &quot;state_5&quot;         &quot;state_6&quot;        
+## [172] &quot;state_8&quot;         &quot;state_9&quot;         &quot;state_10&quot;       
+## [175] &quot;state_11&quot;        &quot;state_12&quot;        &quot;state_13&quot;       
+## [178] &quot;state_15&quot;        &quot;state_16&quot;        &quot;state_17&quot;       
+## [181] &quot;state_18&quot;        &quot;state_19&quot;        &quot;state_20&quot;       
+## [184] &quot;state_21&quot;        &quot;state_22&quot;        &quot;state_23&quot;       
+## [187] &quot;state_24&quot;        &quot;state_25&quot;        &quot;state_26&quot;       
+## [190] &quot;state_27&quot;        &quot;state_28&quot;        &quot;state_29&quot;       
+## [193] &quot;state_30&quot;        &quot;state_31&quot;        &quot;state_32&quot;       
+## [196] &quot;state_33&quot;        &quot;state_34&quot;        &quot;state_35&quot;       
+## [199] &quot;state_36&quot;        &quot;state_37&quot;        &quot;state_38&quot;       
+## [202] &quot;state_39&quot;        &quot;state_40&quot;        &quot;state_41&quot;       
+## [205] &quot;state_42&quot;        &quot;state_44&quot;        &quot;state_45&quot;       
+## [208] &quot;state_46&quot;        &quot;state_47&quot;        &quot;state_48&quot;       
+## [211] &quot;state_49&quot;        &quot;state_50&quot;        &quot;state_51&quot;       
+## [214] &quot;state_53&quot;        &quot;state_54&quot;        &quot;state_55&quot;       
+## [217] &quot;state_56&quot;</code></pre>
 <pre class="r"><code>kable(head(dt)) %&gt;%
   kable_styling() %&gt;%
   scroll_box(width = &quot;100%&quot;)</code></pre>
@@ -3675,157 +3675,157 @@ log_hr_semp
 log_hr_pincp
 </th>
 <th style="text-align:right;">
-deg_1
+state_1
 </th>
 <th style="text-align:right;">
-deg_2
+state_2
 </th>
 <th style="text-align:right;">
-deg_4
+state_4
 </th>
 <th style="text-align:right;">
-deg_5
+state_5
 </th>
 <th style="text-align:right;">
-deg_6
+state_6
 </th>
 <th style="text-align:right;">
-deg_8
+state_8
 </th>
 <th style="text-align:right;">
-deg_9
+state_9
 </th>
 <th style="text-align:right;">
-deg_10
+state_10
 </th>
 <th style="text-align:right;">
-deg_11
+state_11
 </th>
 <th style="text-align:right;">
-deg_12
+state_12
 </th>
 <th style="text-align:right;">
-deg_13
+state_13
 </th>
 <th style="text-align:right;">
-deg_15
+state_15
 </th>
 <th style="text-align:right;">
-deg_16
+state_16
 </th>
 <th style="text-align:right;">
-deg_17
+state_17
 </th>
 <th style="text-align:right;">
-deg_18
+state_18
 </th>
 <th style="text-align:right;">
-deg_19
+state_19
 </th>
 <th style="text-align:right;">
-deg_20
+state_20
 </th>
 <th style="text-align:right;">
-deg_21
+state_21
 </th>
 <th style="text-align:right;">
-deg_22
+state_22
 </th>
 <th style="text-align:right;">
-deg_23
+state_23
 </th>
 <th style="text-align:right;">
-deg_24
+state_24
 </th>
 <th style="text-align:right;">
-deg_25
+state_25
 </th>
 <th style="text-align:right;">
-deg_26
+state_26
 </th>
 <th style="text-align:right;">
-deg_27
+state_27
 </th>
 <th style="text-align:right;">
-deg_28
+state_28
 </th>
 <th style="text-align:right;">
-deg_29
+state_29
 </th>
 <th style="text-align:right;">
-deg_30
+state_30
 </th>
 <th style="text-align:right;">
-deg_31
+state_31
 </th>
 <th style="text-align:right;">
-deg_32
+state_32
 </th>
 <th style="text-align:right;">
-deg_33
+state_33
 </th>
 <th style="text-align:right;">
-deg_34
+state_34
 </th>
 <th style="text-align:right;">
-deg_35
+state_35
 </th>
 <th style="text-align:right;">
-deg_36
+state_36
 </th>
 <th style="text-align:right;">
-deg_37
+state_37
 </th>
 <th style="text-align:right;">
-deg_38
+state_38
 </th>
 <th style="text-align:right;">
-deg_39
+state_39
 </th>
 <th style="text-align:right;">
-deg_40
+state_40
 </th>
 <th style="text-align:right;">
-deg_41
+state_41
 </th>
 <th style="text-align:right;">
-deg_42
+state_42
 </th>
 <th style="text-align:right;">
-deg_44
+state_44
 </th>
 <th style="text-align:right;">
-deg_45
+state_45
 </th>
 <th style="text-align:right;">
-deg_46
+state_46
 </th>
 <th style="text-align:right;">
-deg_47
+state_47
 </th>
 <th style="text-align:right;">
-deg_48
+state_48
 </th>
 <th style="text-align:right;">
-deg_49
+state_49
 </th>
 <th style="text-align:right;">
-deg_50
+state_50
 </th>
 <th style="text-align:right;">
-deg_51
+state_51
 </th>
 <th style="text-align:right;">
-deg_53
+state_53
 </th>
 <th style="text-align:right;">
-deg_54
+state_54
 </th>
 <th style="text-align:right;">
-deg_55
+state_55
 </th>
 <th style="text-align:right;">
-deg_56
+state_56
 </th>
 </tr>
 </thead>
