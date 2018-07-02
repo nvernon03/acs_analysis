@@ -12,8 +12,6 @@ url <- "http://mcdc.missouri.edu/tmpscratch/02JUL1001289.geocorr14/geocorr14.csv
 wd <- Sys.getenv("ACS_DIR") # working directory location
 
 # Scrape webpage
-opts_knit$set(root.dir = wd)
-setwd(wd)
 dt_raw <- as.data.table(read.csv(url, sep=",", header=TRUE))
 setDT(dt_raw)
 
