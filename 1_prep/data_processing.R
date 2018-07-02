@@ -28,6 +28,7 @@ wd <- Sys.getenv("ACS_DIR") # working directory location
 opts_knit$set(root.dir = wd)
 setwd(wd)
 dt_raw <- fread(paste0(file_folder, "/", file_name, ".csv")) # select dataset to use
+dt_urban_pop <- fread(paste0(file_folder, "/", "urban_rural", ".csv"))
 
 
 #' ### Format to Stata variable names; drop some variables
@@ -44,7 +45,14 @@ dt <- dt_raw %>%
   filter(wagp != 0) # drop if wagp is 0
   
 assert_that(min(dt$wkhp) >= hrs_wk) ## ensure that the above drop command worked correctly
+rm(dt_raw)
 
+#' ### merge with urban pop datatable
+#+ echo=TRUE, message=FALSE, warning=TRUE
+dt_urban_pop <- dt_urban_pop %>%
+  rename(puma = puma12)
+
+dt <- merge(dt, dt_urban_pop, by="puma", allow.cartesian=TRUE)
 
 #' ### Print head of data
 #+ echo=TRUE, message=FALSE, warning=FALSE

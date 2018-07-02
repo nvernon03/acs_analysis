@@ -152,7 +152,8 @@ wd &lt;- Sys.getenv(&quot;ACS_DIR&quot;) # working directory location</code></pr
 <h3>Read in the data selected above</h3>
 <pre class="r"><code>opts_knit$set(root.dir = wd)
 setwd(wd)
-dt_raw &lt;- fread(paste0(file_folder, &quot;/&quot;, file_name, &quot;.csv&quot;)) # select dataset to use</code></pre>
+dt_raw &lt;- fread(paste0(file_folder, &quot;/&quot;, file_name, &quot;.csv&quot;)) # select dataset to use
+dt_urban_pop &lt;- fread(paste0(file_folder, &quot;/&quot;, &quot;urban_rural&quot;, &quot;.csv&quot;))</code></pre>
 </div>
 <div id="format-to-stata-variable-names-drop-some-variables" class="section level3">
 <h3>Format to Stata variable names; drop some variables</h3>
@@ -169,7 +170,15 @@ dt_raw &lt;- dt_raw[, {grep('pwgtp', names(dt_raw), value=TRUE)} := NULL] ## dro
   
 assert_that(min(dt$wkhp) &gt;= hrs_wk) ## ensure that the above drop command worked correctly</code></pre>
 <pre><code>## [1] TRUE</code></pre>
+<pre class="r"><code>rm(dt_raw)</code></pre>
 </div>
+</div>
+<div id="merge-with-urban-pop-datatable" class="section level3">
+<h3>merge with urban pop datatable</h3>
+<pre class="r"><code>dt_urban_pop &lt;- dt_urban_pop %&gt;%
+  rename(puma = puma12)
+
+dt &lt;- merge(dt, dt_urban_pop, by=&quot;puma&quot;, allow.cartesian=TRUE)</code></pre>
 </div>
 <div id="print-head-of-data" class="section level3">
 <h3>Print head of data</h3>
@@ -180,6 +189,9 @@ scroll_box(width = &quot;100%&quot;)</code></pre>
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
+<th style="text-align:right;">
+puma
+</th>
 <th style="text-align:left;">
 rt
 </th>
@@ -188,9 +200,6 @@ serialno
 </th>
 <th style="text-align:right;">
 sporder
-</th>
-<th style="text-align:right;">
-puma
 </th>
 <th style="text-align:right;">
 st
@@ -564,21 +573,24 @@ fhins4c
 <th style="text-align:right;">
 fhins5c
 </th>
+<th style="text-align:right;">
+urban_perc
+</th>
 </tr>
 </thead>
 <tbody>
 <tr>
+<td style="text-align:right;">
+100
+</td>
 <td style="text-align:left;">
 P
 </td>
 <td style="text-align:right;">
-80
+462255
 </td>
 <td style="text-align:right;">
 1
-</td>
-<td style="text-align:right;">
-900
 </td>
 <td style="text-align:right;">
 1
@@ -587,7 +599,7 @@ P
 1007588
 </td>
 <td style="text-align:right;">
-78
+61
 </td>
 <td style="text-align:right;">
 1
@@ -638,13 +650,13 @@ NA
 NA
 </td>
 <td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
 2
 </td>
 <td style="text-align:right;">
 1
+</td>
+<td style="text-align:right;">
+2
 </td>
 <td style="text-align:right;">
 2
@@ -662,7 +674,7 @@ NA
 0
 </td>
 <td style="text-align:right;">
-50
+30
 </td>
 <td style="text-align:right;">
 1
@@ -677,22 +689,22 @@ NA
 2
 </td>
 <td style="text-align:right;">
-3
+5
 </td>
 <td style="text-align:right;">
-2
+NA
 </td>
 <td style="text-align:right;">
-2
+NA
 </td>
 <td style="text-align:right;">
-2
+NA
 </td>
 <td style="text-align:right;">
-2
+NA
 </td>
 <td style="text-align:right;">
-1994
+NA
 </td>
 <td style="text-align:right;">
 1
@@ -761,7 +773,7 @@ NA
 NA
 </td>
 <td style="text-align:right;">
-19
+16
 </td>
 <td style="text-align:right;">
 0
@@ -773,10 +785,10 @@ NA
 0
 </td>
 <td style="text-align:right;">
-18500
+0
 </td>
 <td style="text-align:right;">
-27300
+42000
 </td>
 <td style="text-align:right;">
 40
@@ -788,7 +800,7 @@ NA
 1
 </td>
 <td style="text-align:right;">
-1
+NA
 </td>
 <td style="text-align:right;">
 NA
@@ -824,25 +836,25 @@ NA
 1
 </td>
 <td style="text-align:right;">
-8190
+8270
 </td>
 <td style="text-align:right;">
-86
+154
 </td>
 <td style="text-align:right;">
-37
-</td>
-<td style="text-align:right;">
-NA
+94
 </td>
 <td style="text-align:right;">
 NA
 </td>
 <td style="text-align:right;">
-4
+NA
+</td>
+<td style="text-align:right;">
+6
 </td>
 <td style="text-align:left;">
-622
+6231
 </td>
 <td style="text-align:right;">
 1
@@ -854,25 +866,25 @@ NA
 0
 </td>
 <td style="text-align:right;">
-5700
+3030
 </td>
 <td style="text-align:right;">
 4
 </td>
 <td style="text-align:right;">
-27300
+42000
 </td>
 <td style="text-align:right;">
-45800
+42000
 </td>
 <td style="text-align:right;">
-13
+1
 </td>
 <td style="text-align:right;">
-402
+337
 </td>
 <td style="text-align:right;">
-900
+190
 </td>
 <td style="text-align:right;">
 1
@@ -881,25 +893,19 @@ NA
 1
 </td>
 <td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-4
+2
 </td>
 <td style="text-align:right;">
 1
 </td>
 <td style="text-align:right;">
-1
+2
 </td>
 <td style="text-align:right;">
-1
+2
 </td>
 <td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
+2
 </td>
 <td style="text-align:right;">
 0
@@ -914,10 +920,16 @@ NA
 0
 </td>
 <td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
 0
 </td>
 <td style="text-align:right;">
-1
+0
+</td>
+<td style="text-align:right;">
+0
 </td>
 <td style="text-align:right;">
 0
@@ -935,7 +947,7 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-436010
+291031
 </td>
 <td style="text-align:right;">
 NA
@@ -944,416 +956,33 @@ NA
 1
 </td>
 <td style="text-align:right;">
-0
+NA
+</td>
+<td style="text-align:right;">
+NA
 </td>
 <td style="text-align:right;">
 NA
 </td>
 <td style="text-align:right;">
-NA
+0.456334
 </td>
 </tr>
 <tr>
+<td style="text-align:right;">
+100
+</td>
 <td style="text-align:left;">
 P
 </td>
 <td style="text-align:right;">
-107
+199572
 </td>
 <td style="text-align:right;">
 1
 </td>
 <td style="text-align:right;">
-302
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1007588
-</td>
-<td style="text-align:right;">
-46
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-20
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1994
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-20
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-65000
-</td>
-<td style="text-align:right;">
-40
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-939
-</td>
-<td style="text-align:right;">
-999
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-7290
-</td>
-<td style="text-align:right;">
-80
-</td>
-<td style="text-align:right;">
-37
-</td>
-<td style="text-align:right;">
-290
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:left;">
-5413
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1550
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-65000
-</td>
-<td style="text-align:right;">
-65000
-</td>
-<td style="text-align:right;">
-27
-</td>
-<td style="text-align:right;">
-261
-</td>
-<td style="text-align:right;">
-290
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:left;">
-173020
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-P
-</td>
-<td style="text-align:right;">
-180
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2500
-</td>
-<td style="text-align:right;">
-1
+48
 </td>
 <td style="text-align:right;">
 1007588
@@ -1431,10 +1060,10 @@ NA
 2
 </td>
 <td style="text-align:right;">
-4000
+0
 </td>
 <td style="text-align:right;">
-15
+60
 </td>
 <td style="text-align:right;">
 1
@@ -1449,7 +1078,10 @@ NA
 2
 </td>
 <td style="text-align:right;">
-1
+2
+</td>
+<td style="text-align:right;">
+2
 </td>
 <td style="text-align:right;">
 2
@@ -1458,13 +1090,10 @@ NA
 2
 </td>
 <td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
 2
 </td>
 <td style="text-align:right;">
-1975
+1994
 </td>
 <td style="text-align:right;">
 1
@@ -1533,13 +1162,13 @@ NA
 NA
 </td>
 <td style="text-align:right;">
-18
+19
 </td>
 <td style="text-align:right;">
 0
 </td>
 <td style="text-align:right;">
-1
+2
 </td>
 <td style="text-align:right;">
 0
@@ -1548,7 +1177,7 @@ NA
 0
 </td>
 <td style="text-align:right;">
-78000
+7700
 </td>
 <td style="text-align:right;">
 40
@@ -1566,10 +1195,1177 @@ NA
 NA
 </td>
 <td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+939
+</td>
+<td style="text-align:right;">
+999
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+7970
+</td>
+<td style="text-align:right;">
+82
+</td>
+<td style="text-align:right;">
+31
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:left;">
+6211
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3300
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+7700
+</td>
+<td style="text-align:right;">
+7700
+</td>
+<td style="text-align:right;">
+48
+</td>
+<td style="text-align:right;">
+62
+</td>
+<td style="text-align:right;">
+200
+</td>
+<td style="text-align:right;">
+48
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+292010
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.456334
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:left;">
+P
+</td>
+<td style="text-align:right;">
+1220905
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+1007588
+</td>
+<td style="text-align:right;">
+52
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1993
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+70000
+</td>
+<td style="text-align:right;">
+40
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
 4
 </td>
 <td style="text-align:right;">
 999
+</td>
+<td style="text-align:right;">
+999
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4280
+</td>
+<td style="text-align:right;">
+238
+</td>
+<td style="text-align:right;">
+135
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+42393
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4710
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+70000
+</td>
+<td style="text-align:right;">
+70000
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+498
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+411012
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.456334
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:left;">
+P
+</td>
+<td style="text-align:right;">
+708841
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+1007588
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:right;">
+30
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+599
+</td>
+<td style="text-align:right;">
+999
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+5070
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+44611
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4720
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+412010
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.456334
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:left;">
+P
+</td>
+<td style="text-align:right;">
+494544
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+22
+</td>
+<td style="text-align:right;">
+1007588
+</td>
+<td style="text-align:right;">
+56
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+850
+</td>
+<td style="text-align:right;">
+25
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1988
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+45000
+</td>
+<td style="text-align:right;">
+50
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+939
 </td>
 <td style="text-align:right;">
 999
@@ -1599,19 +2395,19 @@ NA
 770
 </td>
 <td style="text-align:right;">
-91
+79
 </td>
 <td style="text-align:right;">
-49
-</td>
-<td style="text-align:right;">
-NA
+35
 </td>
 <td style="text-align:right;">
 NA
 </td>
 <td style="text-align:right;">
-1
+NA
+</td>
+<td style="text-align:right;">
+4
 </td>
 <td style="text-align:left;">
 23
@@ -1626,28 +2422,28 @@ NA
 0
 </td>
 <td style="text-align:right;">
-6200
+220
 </td>
 <td style="text-align:right;">
 NA
 </td>
 <td style="text-align:right;">
-78000
+45000
 </td>
 <td style="text-align:right;">
-82000
+45850
 </td>
 <td style="text-align:right;">
-1
+22
 </td>
 <td style="text-align:right;">
-501
+370
 </td>
 <td style="text-align:right;">
-2500
+100
 </td>
 <td style="text-align:right;">
-1
+22
 </td>
 <td style="text-align:right;">
 1
@@ -1707,7 +2503,7 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-471011
+119021
 </td>
 <td style="text-align:right;">
 NA
@@ -1724,28 +2520,31 @@ NA
 <td style="text-align:right;">
 NA
 </td>
+<td style="text-align:right;">
+0.456334
+</td>
 </tr>
 <tr>
+<td style="text-align:right;">
+100
+</td>
 <td style="text-align:left;">
 P
 </td>
 <td style="text-align:right;">
-300
+1229459
 </td>
 <td style="text-align:right;">
 1
 </td>
 <td style="text-align:right;">
-2702
-</td>
-<td style="text-align:right;">
-1
+24
 </td>
 <td style="text-align:right;">
 1007588
 </td>
 <td style="text-align:right;">
-25
+32
 </td>
 <td style="text-align:right;">
 1
@@ -1754,9 +2553,6 @@ P
 NA
 </td>
 <td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
 2
 </td>
 <td style="text-align:right;">
@@ -1770,12 +2566,6 @@ NA
 </td>
 <td style="text-align:right;">
 2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
 </td>
 <td style="text-align:right;">
 2
@@ -1787,7 +2577,16 @@ NA
 NA
 </td>
 <td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
 NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
 </td>
 <td style="text-align:right;">
 NA
@@ -1820,7 +2619,7 @@ NA
 0
 </td>
 <td style="text-align:right;">
-15
+50
 </td>
 <td style="text-align:right;">
 1
@@ -1853,7 +2652,7 @@ NA
 NA
 </td>
 <td style="text-align:right;">
-1
+3
 </td>
 <td style="text-align:right;">
 4
@@ -1913,10 +2712,10 @@ NA
 0
 </td>
 <td style="text-align:right;">
-2
+1
 </td>
 <td style="text-align:right;">
-15
+NA
 </td>
 <td style="text-align:right;">
 19
@@ -1925,16 +2724,112 @@ NA
 0
 </td>
 <td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+45200
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
 1
 </td>
 <td style="text-align:right;">
-0
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+924
+</td>
+<td style="text-align:right;">
+999
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+6990
+</td>
+<td style="text-align:right;">
+77
+</td>
+<td style="text-align:right;">
+28
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+524
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
 </td>
 <td style="text-align:right;">
 0
 </td>
 <td style="text-align:right;">
-19200
+1006
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+45200
+</td>
+<td style="text-align:right;">
+45200
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+364
+</td>
+<td style="text-align:right;">
+100
 </td>
 <td style="text-align:right;">
 24
@@ -1943,102 +2838,6 @@ NA
 1
 </td>
 <td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-999
-</td>
-<td style="text-align:right;">
-999
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-8190
-</td>
-<td style="text-align:right;">
-211
-</td>
-<td style="text-align:right;">
-124
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-6
-</td>
-<td style="text-align:left;">
-622
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-3600
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-19200
-</td>
-<td style="text-align:right;">
-19200
-</td>
-<td style="text-align:right;">
-22
-</td>
-<td style="text-align:right;">
-154
-</td>
-<td style="text-align:right;">
-2700
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
 2
 </td>
 <td style="text-align:right;">
@@ -2093,7 +2892,7 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-311010
+151121
 </td>
 <td style="text-align:right;">
 NA
@@ -2110,777 +2909,8 @@ NA
 <td style="text-align:right;">
 NA
 </td>
-</tr>
-<tr>
-<td style="text-align:left;">
-P
-</td>
 <td style="text-align:right;">
-300
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2702
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1007588
-</td>
-<td style="text-align:right;">
-23
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-10
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-13
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-20
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-19100
-</td>
-<td style="text-align:right;">
-40
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-999
-</td>
-<td style="text-align:right;">
-999
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-7980
-</td>
-<td style="text-align:right;">
-78
-</td>
-<td style="text-align:right;">
-37
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-6
-</td>
-<td style="text-align:left;">
-6212
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-3640
-</td>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-19100
-</td>
-<td style="text-align:right;">
-19100
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-153
-</td>
-<td style="text-align:right;">
-2700
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:left;">
-319091
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-P
-</td>
-<td style="text-align:right;">
-313
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2500
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1007588
-</td>
-<td style="text-align:right;">
-35
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-15
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2008
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-21
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-35000
-</td>
-<td style="text-align:right;">
-40
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-940
-</td>
-<td style="text-align:right;">
-999
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-7860
-</td>
-<td style="text-align:right;">
-85
-</td>
-<td style="text-align:right;">
-43
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:left;">
-6111
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2310
-</td>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-35000
-</td>
-<td style="text-align:right;">
-35000
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-282
-</td>
-<td style="text-align:right;">
-2500
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:left;">
-252020
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
+0.456334
 </td>
 </tr>
 </tbody>
@@ -3085,7 +3115,7 @@ dt &lt;- mutate(dt, military = as.numeric(mil != 4))
 ## recode sex dummy
 dt$sex &lt;- ifelse(dt$sex==1, 0, 1)
 
-## log of wage variables
+## natural log of wage variables
 log_cols &lt;- c(&quot;intp&quot;, &quot;wagp&quot;, &quot;oip&quot;, &quot;pap&quot;, &quot;semp&quot;, &quot;pincp&quot;)
 dt &lt;- mutate_at(dt, setNames(log_cols, paste0(&quot;log_&quot;, log_cols)), log)
 
@@ -3107,8 +3137,8 @@ dt &lt;- cbind(dt, state_coded)</code></pre>
 <div id="print-variable-names" class="section level3">
 <h3>Print variable names</h3>
 <pre class="r"><code>print(names(dt))</code></pre>
-<pre><code>##   [1] &quot;rt&quot;              &quot;serialno&quot;        &quot;sporder&quot;        
-##   [4] &quot;puma&quot;            &quot;st&quot;              &quot;adjinc&quot;         
+<pre><code>##   [1] &quot;puma&quot;            &quot;rt&quot;              &quot;serialno&quot;       
+##   [4] &quot;sporder&quot;         &quot;st&quot;              &quot;adjinc&quot;         
 ##   [7] &quot;agep&quot;            &quot;cit&quot;             &quot;citwp&quot;          
 ##  [10] &quot;cow&quot;             &quot;ddrs&quot;            &quot;dear&quot;           
 ##  [13] &quot;deye&quot;            &quot;dout&quot;            &quot;dphy&quot;           
@@ -3149,37 +3179,37 @@ dt &lt;- cbind(dt, state_coded)</code></pre>
 ## [118] &quot;rc&quot;              &quot;sciengp&quot;         &quot;sciengrlp&quot;      
 ## [121] &quot;sfn&quot;             &quot;sfr&quot;             &quot;socp&quot;           
 ## [124] &quot;vps&quot;             &quot;waob&quot;            &quot;fhins3c&quot;        
-## [127] &quot;fhins4c&quot;         &quot;fhins5c&quot;         &quot;easn&quot;           
-## [130] &quot;asn&quot;             &quot;wht&quot;             &quot;race&quot;           
-## [133] &quot;race_afr_am&quot;     &quot;race_east_asian&quot; &quot;race_other&quot;     
-## [136] &quot;race_white&quot;      &quot;deg&quot;             &quot;deg_associate&quot;  
-## [139] &quot;deg_bach&quot;        &quot;deg_doctorate&quot;   &quot;deg_hs&quot;         
-## [142] &quot;deg_master&quot;      &quot;deg_no_hs&quot;       &quot;schl_yrs&quot;       
-## [145] &quot;exp&quot;             &quot;exp2&quot;            &quot;married&quot;        
-## [148] &quot;military&quot;        &quot;log_intp&quot;        &quot;log_wagp&quot;       
-## [151] &quot;log_oip&quot;         &quot;log_pap&quot;         &quot;log_semp&quot;       
-## [154] &quot;log_pincp&quot;       &quot;hr_intp&quot;         &quot;hr_wagp&quot;        
-## [157] &quot;hr_oip&quot;          &quot;hr_pap&quot;          &quot;hr_semp&quot;        
-## [160] &quot;hr_pincp&quot;        &quot;log_hr_intp&quot;     &quot;log_hr_wagp&quot;    
-## [163] &quot;log_hr_oip&quot;      &quot;log_hr_pap&quot;      &quot;log_hr_semp&quot;    
-## [166] &quot;log_hr_pincp&quot;    &quot;state_1&quot;         &quot;state_2&quot;        
-## [169] &quot;state_4&quot;         &quot;state_5&quot;         &quot;state_6&quot;        
-## [172] &quot;state_8&quot;         &quot;state_9&quot;         &quot;state_10&quot;       
-## [175] &quot;state_11&quot;        &quot;state_12&quot;        &quot;state_13&quot;       
-## [178] &quot;state_15&quot;        &quot;state_16&quot;        &quot;state_17&quot;       
-## [181] &quot;state_18&quot;        &quot;state_19&quot;        &quot;state_20&quot;       
-## [184] &quot;state_21&quot;        &quot;state_22&quot;        &quot;state_23&quot;       
-## [187] &quot;state_24&quot;        &quot;state_25&quot;        &quot;state_26&quot;       
-## [190] &quot;state_27&quot;        &quot;state_28&quot;        &quot;state_29&quot;       
-## [193] &quot;state_30&quot;        &quot;state_31&quot;        &quot;state_32&quot;       
-## [196] &quot;state_33&quot;        &quot;state_34&quot;        &quot;state_35&quot;       
-## [199] &quot;state_36&quot;        &quot;state_37&quot;        &quot;state_38&quot;       
-## [202] &quot;state_39&quot;        &quot;state_40&quot;        &quot;state_41&quot;       
-## [205] &quot;state_42&quot;        &quot;state_44&quot;        &quot;state_45&quot;       
-## [208] &quot;state_46&quot;        &quot;state_47&quot;        &quot;state_48&quot;       
-## [211] &quot;state_49&quot;        &quot;state_50&quot;        &quot;state_51&quot;       
-## [214] &quot;state_53&quot;        &quot;state_54&quot;        &quot;state_55&quot;       
-## [217] &quot;state_56&quot;</code></pre>
+## [127] &quot;fhins4c&quot;         &quot;fhins5c&quot;         &quot;urban_perc&quot;     
+## [130] &quot;easn&quot;            &quot;asn&quot;             &quot;wht&quot;            
+## [133] &quot;race&quot;            &quot;race_afr_am&quot;     &quot;race_east_asian&quot;
+## [136] &quot;race_other&quot;      &quot;race_white&quot;      &quot;deg&quot;            
+## [139] &quot;deg_associate&quot;   &quot;deg_bach&quot;        &quot;deg_doctorate&quot;  
+## [142] &quot;deg_hs&quot;          &quot;deg_master&quot;      &quot;deg_no_hs&quot;      
+## [145] &quot;schl_yrs&quot;        &quot;exp&quot;             &quot;exp2&quot;           
+## [148] &quot;married&quot;         &quot;military&quot;        &quot;log_intp&quot;       
+## [151] &quot;log_wagp&quot;        &quot;log_oip&quot;         &quot;log_pap&quot;        
+## [154] &quot;log_semp&quot;        &quot;log_pincp&quot;       &quot;hr_intp&quot;        
+## [157] &quot;hr_wagp&quot;         &quot;hr_oip&quot;          &quot;hr_pap&quot;         
+## [160] &quot;hr_semp&quot;         &quot;hr_pincp&quot;        &quot;log_hr_intp&quot;    
+## [163] &quot;log_hr_wagp&quot;     &quot;log_hr_oip&quot;      &quot;log_hr_pap&quot;     
+## [166] &quot;log_hr_semp&quot;     &quot;log_hr_pincp&quot;    &quot;state_1&quot;        
+## [169] &quot;state_2&quot;         &quot;state_4&quot;         &quot;state_5&quot;        
+## [172] &quot;state_6&quot;         &quot;state_8&quot;         &quot;state_9&quot;        
+## [175] &quot;state_10&quot;        &quot;state_11&quot;        &quot;state_12&quot;       
+## [178] &quot;state_13&quot;        &quot;state_15&quot;        &quot;state_16&quot;       
+## [181] &quot;state_17&quot;        &quot;state_18&quot;        &quot;state_19&quot;       
+## [184] &quot;state_20&quot;        &quot;state_21&quot;        &quot;state_22&quot;       
+## [187] &quot;state_23&quot;        &quot;state_24&quot;        &quot;state_25&quot;       
+## [190] &quot;state_26&quot;        &quot;state_27&quot;        &quot;state_28&quot;       
+## [193] &quot;state_29&quot;        &quot;state_30&quot;        &quot;state_31&quot;       
+## [196] &quot;state_32&quot;        &quot;state_33&quot;        &quot;state_34&quot;       
+## [199] &quot;state_35&quot;        &quot;state_36&quot;        &quot;state_37&quot;       
+## [202] &quot;state_38&quot;        &quot;state_39&quot;        &quot;state_40&quot;       
+## [205] &quot;state_41&quot;        &quot;state_42&quot;        &quot;state_44&quot;       
+## [208] &quot;state_45&quot;        &quot;state_46&quot;        &quot;state_47&quot;       
+## [211] &quot;state_48&quot;        &quot;state_49&quot;        &quot;state_50&quot;       
+## [214] &quot;state_51&quot;        &quot;state_53&quot;        &quot;state_54&quot;       
+## [217] &quot;state_55&quot;        &quot;state_56&quot;</code></pre>
 <pre class="r"><code>kable(head(dt)) %&gt;%
   kable_styling() %&gt;%
   scroll_box(width = &quot;100%&quot;)</code></pre>
@@ -3187,6 +3217,9 @@ dt &lt;- cbind(dt, state_coded)</code></pre>
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
+<th style="text-align:right;">
+puma
+</th>
 <th style="text-align:left;">
 rt
 </th>
@@ -3195,9 +3228,6 @@ serialno
 </th>
 <th style="text-align:right;">
 sporder
-</th>
-<th style="text-align:right;">
-puma
 </th>
 <th style="text-align:right;">
 st
@@ -3570,6 +3600,9 @@ fhins4c
 </th>
 <th style="text-align:right;">
 fhins5c
+</th>
+<th style="text-align:right;">
+urban_perc
 </th>
 <th style="text-align:right;">
 easn
@@ -3842,17 +3875,17 @@ state_56
 </thead>
 <tbody>
 <tr>
+<td style="text-align:right;">
+100
+</td>
 <td style="text-align:left;">
 P
 </td>
 <td style="text-align:right;">
-80
+462255
 </td>
 <td style="text-align:right;">
 1
-</td>
-<td style="text-align:right;">
-900
 </td>
 <td style="text-align:right;">
 1
@@ -3861,7 +3894,7 @@ P
 1007588
 </td>
 <td style="text-align:right;">
-78
+61
 </td>
 <td style="text-align:right;">
 1
@@ -3912,13 +3945,13 @@ NA
 NA
 </td>
 <td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
 2
 </td>
 <td style="text-align:right;">
 1
+</td>
+<td style="text-align:right;">
+2
 </td>
 <td style="text-align:right;">
 2
@@ -3936,7 +3969,7 @@ NA
 0
 </td>
 <td style="text-align:right;">
-50
+30
 </td>
 <td style="text-align:right;">
 1
@@ -3951,22 +3984,22 @@ NA
 2
 </td>
 <td style="text-align:right;">
-3
+5
 </td>
 <td style="text-align:right;">
-2
+NA
 </td>
 <td style="text-align:right;">
-2
+NA
 </td>
 <td style="text-align:right;">
-2
+NA
 </td>
 <td style="text-align:right;">
-2
+NA
 </td>
 <td style="text-align:right;">
-1994
+NA
 </td>
 <td style="text-align:right;">
 1
@@ -4035,7 +4068,7 @@ NA
 NA
 </td>
 <td style="text-align:right;">
-19
+16
 </td>
 <td style="text-align:right;">
 0
@@ -4047,10 +4080,10 @@ NA
 0
 </td>
 <td style="text-align:right;">
-18500
+0
 </td>
 <td style="text-align:right;">
-27300
+42000
 </td>
 <td style="text-align:right;">
 40
@@ -4062,7 +4095,7 @@ NA
 1
 </td>
 <td style="text-align:right;">
-1
+NA
 </td>
 <td style="text-align:right;">
 NA
@@ -4098,25 +4131,25 @@ NA
 1
 </td>
 <td style="text-align:right;">
-8190
+8270
 </td>
 <td style="text-align:right;">
-86
+154
 </td>
 <td style="text-align:right;">
-37
-</td>
-<td style="text-align:right;">
-NA
+94
 </td>
 <td style="text-align:right;">
 NA
 </td>
 <td style="text-align:right;">
-4
+NA
+</td>
+<td style="text-align:right;">
+6
 </td>
 <td style="text-align:left;">
-622
+6231
 </td>
 <td style="text-align:right;">
 1
@@ -4128,45 +4161,60 @@ NA
 0
 </td>
 <td style="text-align:right;">
-5700
-</td>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-27300
-</td>
-<td style="text-align:right;">
-45800
-</td>
-<td style="text-align:right;">
-13
-</td>
-<td style="text-align:right;">
-402
-</td>
-<td style="text-align:right;">
-900
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
+3030
 </td>
 <td style="text-align:right;">
 4
 </td>
 <td style="text-align:right;">
+42000
+</td>
+<td style="text-align:right;">
+42000
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+337
+</td>
+<td style="text-align:right;">
+190
+</td>
+<td style="text-align:right;">
 1
 </td>
 <td style="text-align:right;">
 1
 </td>
 <td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
 1
 </td>
 <td style="text-align:right;">
@@ -4177,21 +4225,6 @@ NA
 </td>
 <td style="text-align:right;">
 0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
 </td>
 <td style="text-align:right;">
 0
@@ -4209,7 +4242,7 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-436010
+291031
 </td>
 <td style="text-align:right;">
 NA
@@ -4218,37 +4251,40 @@ NA
 1
 </td>
 <td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
 NA
 </td>
 <td style="text-align:right;">
 NA
 </td>
 <td style="text-align:right;">
-0
+NA
+</td>
+<td style="text-align:right;">
+0.456334
 </td>
 <td style="text-align:right;">
 0
 </td>
 <td style="text-align:right;">
-1
+0
+</td>
+<td style="text-align:right;">
+0
 </td>
 <td style="text-align:left;">
-white
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
+afr_am
 </td>
 <td style="text-align:right;">
 1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
 </td>
 <td style="text-align:left;">
 hs
@@ -4272,43 +4308,13 @@ hs
 0
 </td>
 <td style="text-align:right;">
-14
+12
 </td>
 <td style="text-align:right;">
-59
+44
 </td>
 <td style="text-align:right;">
-3481
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
-10.214642
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
-10.732039
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-682.5
+1936
 </td>
 <td style="text-align:right;">
 0
@@ -4317,16 +4323,46 @@ hs
 0
 </td>
 <td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+10.645425
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+10.645425
+</td>
+<td style="text-align:right;">
 0
 </td>
 <td style="text-align:right;">
-1145.0
+1050.00000
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1050.00000
 </td>
 <td style="text-align:right;">
 -Inf
 </td>
 <td style="text-align:right;">
-6.525762
+6.956545
 </td>
 <td style="text-align:right;">
 -Inf
@@ -4338,7 +4374,7 @@ hs
 -Inf
 </td>
 <td style="text-align:right;">
-7.043160
+6.956545
 </td>
 <td style="text-align:right;">
 1
@@ -4495,673 +4531,20 @@ hs
 </td>
 </tr>
 <tr>
+<td style="text-align:right;">
+100
+</td>
 <td style="text-align:left;">
 P
 </td>
 <td style="text-align:right;">
-107
+199572
 </td>
 <td style="text-align:right;">
 1
 </td>
 <td style="text-align:right;">
-302
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1007588
-</td>
-<td style="text-align:right;">
-46
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-20
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1994
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-20
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-65000
-</td>
-<td style="text-align:right;">
-40
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-939
-</td>
-<td style="text-align:right;">
-999
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-7290
-</td>
-<td style="text-align:right;">
-80
-</td>
-<td style="text-align:right;">
-37
-</td>
-<td style="text-align:right;">
-290
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:left;">
-5413
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1550
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-65000
-</td>
-<td style="text-align:right;">
-65000
-</td>
-<td style="text-align:right;">
-27
-</td>
-<td style="text-align:right;">
-261
-</td>
-<td style="text-align:right;">
-290
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:left;">
-173020
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:left;">
-white
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:left;">
-associate
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-14
-</td>
-<td style="text-align:right;">
-27
-</td>
-<td style="text-align:right;">
-729
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
-11.082142
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
-11.082142
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1625.0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1625.0
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
-7.393263
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
-7.393263
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-P
-</td>
-<td style="text-align:right;">
-180
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2500
-</td>
-<td style="text-align:right;">
-1
+48
 </td>
 <td style="text-align:right;">
 1007588
@@ -5239,10 +4622,10 @@ NA
 2
 </td>
 <td style="text-align:right;">
-4000
+0
 </td>
 <td style="text-align:right;">
-15
+60
 </td>
 <td style="text-align:right;">
 1
@@ -5257,7 +4640,10 @@ NA
 2
 </td>
 <td style="text-align:right;">
-1
+2
+</td>
+<td style="text-align:right;">
+2
 </td>
 <td style="text-align:right;">
 2
@@ -5266,13 +4652,10 @@ NA
 2
 </td>
 <td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
 2
 </td>
 <td style="text-align:right;">
-1975
+1994
 </td>
 <td style="text-align:right;">
 1
@@ -5341,7 +4724,13 @@ NA
 NA
 </td>
 <td style="text-align:right;">
-18
+19
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
 </td>
 <td style="text-align:right;">
 0
@@ -5350,13 +4739,7 @@ NA
 0
 </td>
 <td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-78000
+7700
 </td>
 <td style="text-align:right;">
 40
@@ -5374,10 +4757,10 @@ NA
 NA
 </td>
 <td style="text-align:right;">
-4
+1
 </td>
 <td style="text-align:right;">
-999
+939
 </td>
 <td style="text-align:right;">
 999
@@ -5404,25 +4787,25 @@ NA
 1
 </td>
 <td style="text-align:right;">
-770
+7970
 </td>
 <td style="text-align:right;">
-91
+82
 </td>
 <td style="text-align:right;">
-49
-</td>
-<td style="text-align:right;">
-NA
+31
 </td>
 <td style="text-align:right;">
 NA
 </td>
 <td style="text-align:right;">
-1
+NA
+</td>
+<td style="text-align:right;">
+3
 </td>
 <td style="text-align:left;">
-23
+6211
 </td>
 <td style="text-align:right;">
 1
@@ -5434,28 +4817,28 @@ NA
 0
 </td>
 <td style="text-align:right;">
-6200
+3300
 </td>
 <td style="text-align:right;">
-NA
+4
 </td>
 <td style="text-align:right;">
-78000
+7700
 </td>
 <td style="text-align:right;">
-82000
+7700
 </td>
 <td style="text-align:right;">
-1
+48
 </td>
 <td style="text-align:right;">
-501
+62
 </td>
 <td style="text-align:right;">
-2500
+200
 </td>
 <td style="text-align:right;">
-1
+48
 </td>
 <td style="text-align:right;">
 1
@@ -5515,7 +4898,7 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-471011
+292010
 </td>
 <td style="text-align:right;">
 NA
@@ -5531,6 +4914,665 @@ NA
 </td>
 <td style="text-align:right;">
 NA
+</td>
+<td style="text-align:right;">
+0.456334
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+white
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+hs
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+45
+</td>
+<td style="text-align:right;">
+2025
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+8.948976
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+8.948976
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+192.50000
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+192.50000
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+5.260096
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+5.260096
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:left;">
+P
+</td>
+<td style="text-align:right;">
+1220905
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+1007588
+</td>
+<td style="text-align:right;">
+52
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1993
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+70000
+</td>
+<td style="text-align:right;">
+40
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+999
+</td>
+<td style="text-align:right;">
+999
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4280
+</td>
+<td style="text-align:right;">
+238
+</td>
+<td style="text-align:right;">
+135
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+42393
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+4710
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+70000
+</td>
+<td style="text-align:right;">
+70000
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+498
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+411012
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.456334
 </td>
 <td style="text-align:right;">
 0
@@ -5581,70 +5623,10 @@ hs
 12
 </td>
 <td style="text-align:right;">
-47
+35
 </td>
 <td style="text-align:right;">
-2209
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-8.29405
-</td>
-<td style="text-align:right;">
-11.264464
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
-11.314474
-</td>
-<td style="text-align:right;">
-100
-</td>
-<td style="text-align:right;">
-1950.0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2050.0
-</td>
-<td style="text-align:right;">
-4.60517
-</td>
-<td style="text-align:right;">
-7.575585
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
-7.625595
+1225
 </td>
 <td style="text-align:right;">
 1
@@ -5653,7 +5635,58 @@ hs
 0
 </td>
 <td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+11.156251
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+11.156251
+</td>
+<td style="text-align:right;">
 0
+</td>
+<td style="text-align:right;">
+1750.00000
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1750.00000
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+7.467371
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+7.467371
 </td>
 <td style="text-align:right;">
 0
@@ -5696,6 +5729,15 @@ hs
 </td>
 <td style="text-align:right;">
 0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
 </td>
 <td style="text-align:right;">
 0
@@ -5801,26 +5843,26 @@ hs
 </td>
 </tr>
 <tr>
+<td style="text-align:right;">
+100
+</td>
 <td style="text-align:left;">
 P
 </td>
 <td style="text-align:right;">
-300
+708841
 </td>
 <td style="text-align:right;">
 1
 </td>
 <td style="text-align:right;">
-2702
-</td>
-<td style="text-align:right;">
-1
+36
 </td>
 <td style="text-align:right;">
 1007588
 </td>
 <td style="text-align:right;">
-25
+18
 </td>
 <td style="text-align:right;">
 1
@@ -5859,7 +5901,7 @@ NA
 NA
 </td>
 <td style="text-align:right;">
-NA
+2
 </td>
 <td style="text-align:right;">
 NA
@@ -5869,12 +5911,12 @@ NA
 </td>
 <td style="text-align:right;">
 NA
-</td>
-<td style="text-align:right;">
-1
 </td>
 <td style="text-align:right;">
 2
+</td>
+<td style="text-align:right;">
+1
 </td>
 <td style="text-align:right;">
 2
@@ -5895,13 +5937,13 @@ NA
 0
 </td>
 <td style="text-align:right;">
-15
+NA
 </td>
 <td style="text-align:right;">
-1
+NA
 </td>
 <td style="text-align:right;">
-1
+NA
 </td>
 <td style="text-align:right;">
 NA
@@ -5961,16 +6003,16 @@ NA
 NA
 </td>
 <td style="text-align:right;">
-3
+2
 </td>
 <td style="text-align:right;">
 5
 </td>
 <td style="text-align:right;">
-3
+2
 </td>
 <td style="text-align:right;">
-3
+2
 </td>
 <td style="text-align:right;">
 3
@@ -5982,7 +6024,7 @@ NA
 0
 </td>
 <td style="text-align:right;">
-0
+17
 </td>
 <td style="text-align:right;">
 0
@@ -5994,43 +6036,43 @@ NA
 15
 </td>
 <td style="text-align:right;">
-19
+18
 </td>
 <td style="text-align:right;">
 0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-19200
-</td>
-<td style="text-align:right;">
-24
 </td>
 <td style="text-align:right;">
 1
 </td>
 <td style="text-align:right;">
-1
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+2000
+</td>
+<td style="text-align:right;">
+30
 </td>
 <td style="text-align:right;">
 1
-</td>
-<td style="text-align:right;">
-NA
 </td>
 <td style="text-align:right;">
 4
 </td>
 <td style="text-align:right;">
-999
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+599
 </td>
 <td style="text-align:right;">
 999
@@ -6042,13 +6084,13 @@ NA
 2
 </td>
 <td style="text-align:right;">
-1
+NA
 </td>
 <td style="text-align:right;">
 NA
 </td>
 <td style="text-align:right;">
-1
+6
 </td>
 <td style="text-align:right;">
 1
@@ -6057,13 +6099,13 @@ NA
 1
 </td>
 <td style="text-align:right;">
-8190
+5070
 </td>
 <td style="text-align:right;">
-211
+NA
 </td>
 <td style="text-align:right;">
-124
+NA
 </td>
 <td style="text-align:right;">
 NA
@@ -6075,7 +6117,7 @@ NA
 6
 </td>
 <td style="text-align:left;">
-622
+44611
 </td>
 <td style="text-align:right;">
 1
@@ -6087,28 +6129,1340 @@ NA
 0
 </td>
 <td style="text-align:right;">
-3600
+4720
 </td>
 <td style="text-align:right;">
 NA
 </td>
 <td style="text-align:right;">
-19200
+2000
 </td>
 <td style="text-align:right;">
-19200
+2000
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+412010
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.456334
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+afr_am
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:left;">
+hs
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+7.600903
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+7.600903
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+66.66667
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+66.66667
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+4.199705
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+4.199705
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:left;">
+P
+</td>
+<td style="text-align:right;">
+494544
+</td>
+<td style="text-align:right;">
+1
 </td>
 <td style="text-align:right;">
 22
 </td>
 <td style="text-align:right;">
-154
+1007588
 </td>
 <td style="text-align:right;">
-2700
+56
 </td>
 <td style="text-align:right;">
 1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+850
+</td>
+<td style="text-align:right;">
+25
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1988
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+45000
+</td>
+<td style="text-align:right;">
+50
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+939
+</td>
+<td style="text-align:right;">
+999
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+770
+</td>
+<td style="text-align:right;">
+79
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:left;">
+23
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+220
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+45000
+</td>
+<td style="text-align:right;">
+45850
+</td>
+<td style="text-align:right;">
+22
+</td>
+<td style="text-align:right;">
+370
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+22
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:left;">
+119021
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.456334
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+white
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:left;">
+no_hs
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+42
+</td>
+<td style="text-align:right;">
+1764
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+6.745236
+</td>
+<td style="text-align:right;">
+10.714418
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+10.733130
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+900.00000
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+917.00000
+</td>
+<td style="text-align:right;">
+2.833213
+</td>
+<td style="text-align:right;">
+6.802395
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+-Inf
+</td>
+<td style="text-align:right;">
+6.821108
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:left;">
+P
+</td>
+<td style="text-align:right;">
+1229459
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+1007588
+</td>
+<td style="text-align:right;">
+32
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+50
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+45200
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+924
+</td>
+<td style="text-align:right;">
+999
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+6990
+</td>
+<td style="text-align:right;">
+77
+</td>
+<td style="text-align:right;">
+28
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:left;">
+524
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1006
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+45200
+</td>
+<td style="text-align:right;">
+45200
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+364
+</td>
+<td style="text-align:right;">
+100
+</td>
+<td style="text-align:right;">
+24
 </td>
 <td style="text-align:right;">
 1
@@ -6168,7 +7522,7 @@ NA
 NA
 </td>
 <td style="text-align:left;">
-311010
+151121
 </td>
 <td style="text-align:right;">
 NA
@@ -6184,6 +7538,9 @@ NA
 </td>
 <td style="text-align:right;">
 NA
+</td>
+<td style="text-align:right;">
+0.456334
 </td>
 <td style="text-align:right;">
 0
@@ -6234,663 +7591,10 @@ hs
 14
 </td>
 <td style="text-align:right;">
-6
-</td>
-<td style="text-align:right;">
-36
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
-9.862666
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
-9.862666
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-800.0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-800.0
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
-6.684612
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
-6.684612
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-P
-</td>
-<td style="text-align:right;">
-300
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2702
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1007588
-</td>
-<td style="text-align:right;">
-23
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-10
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
 13
 </td>
 <td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-20
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-19100
-</td>
-<td style="text-align:right;">
-40
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-999
-</td>
-<td style="text-align:right;">
-999
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-7980
-</td>
-<td style="text-align:right;">
-78
-</td>
-<td style="text-align:right;">
-37
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-6
-</td>
-<td style="text-align:left;">
-6212
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-3640
-</td>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-19100
-</td>
-<td style="text-align:right;">
-19100
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-153
-</td>
-<td style="text-align:right;">
-2700
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:left;">
-319091
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:left;">
-white
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:left;">
-associate
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-14
-</td>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-16
+169
 </td>
 <td style="text-align:right;">
 0
@@ -6902,7 +7606,7 @@ associate
 -Inf
 </td>
 <td style="text-align:right;">
-9.857444
+10.718852
 </td>
 <td style="text-align:right;">
 -Inf
@@ -6914,13 +7618,13 @@ associate
 -Inf
 </td>
 <td style="text-align:right;">
-9.857444
+10.718852
 </td>
 <td style="text-align:right;">
 0
 </td>
 <td style="text-align:right;">
-477.5
+961.70213
 </td>
 <td style="text-align:right;">
 0
@@ -6932,630 +7636,13 @@ associate
 0
 </td>
 <td style="text-align:right;">
-477.5
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
-6.168564
+961.70213
 </td>
 <td style="text-align:right;">
 -Inf
 </td>
 <td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
-6.168564
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-P
-</td>
-<td style="text-align:right;">
-313
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2500
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1007588
-</td>
-<td style="text-align:right;">
-35
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-15
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2008
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-21
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-35000
-</td>
-<td style="text-align:right;">
-40
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-940
-</td>
-<td style="text-align:right;">
-999
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-7860
-</td>
-<td style="text-align:right;">
-85
-</td>
-<td style="text-align:right;">
-43
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:left;">
-6111
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2310
-</td>
-<td style="text-align:right;">
-4
-</td>
-<td style="text-align:right;">
-35000
-</td>
-<td style="text-align:right;">
-35000
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-282
-</td>
-<td style="text-align:right;">
-2500
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-3
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-2
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:left;">
-252020
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-NA
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:left;">
-white
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:left;">
-bach
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-16
-</td>
-<td style="text-align:right;">
-14
-</td>
-<td style="text-align:right;">
-196
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
--Inf
-</td>
-<td style="text-align:right;">
-10.463103
+6.868705
 </td>
 <td style="text-align:right;">
 -Inf
@@ -7567,13 +7654,7 @@ bach
 -Inf
 </td>
 <td style="text-align:right;">
-10.463103
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-875.0
+6.868705
 </td>
 <td style="text-align:right;">
 0
@@ -7585,88 +7666,58 @@ bach
 0
 </td>
 <td style="text-align:right;">
-875.0
+0
 </td>
 <td style="text-align:right;">
--Inf
+0
 </td>
 <td style="text-align:right;">
-6.774224
+0
 </td>
 <td style="text-align:right;">
--Inf
+0
 </td>
 <td style="text-align:right;">
--Inf
+0
 </td>
 <td style="text-align:right;">
--Inf
+0
 </td>
 <td style="text-align:right;">
-6.774224
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
 </td>
 <td style="text-align:right;">
 1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-0
 </td>
 <td style="text-align:right;">
 0
