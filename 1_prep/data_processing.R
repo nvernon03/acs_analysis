@@ -33,20 +33,24 @@ dt_raw <- fread(paste0(file_folder, "/", file_name, ".csv")) # select dataset to
 #' ### Format to Stata variable names; drop some variables
 #+ echo=TRUE, message=FALSE, warning=FALSE
 names(dt_raw) <- tolower(names(dt_raw)) ## lower case to match stata
-dt <- dt_raw[, {grep('pwgtp', names(dt_raw), value=TRUE)} := NULL] ## drop unneeded variables that start with pwgtp --- must happen before "tolower" command
+dt_raw <- dt_raw[, {grep('pwgtp', names(dt_raw), value=TRUE)} := NULL] ## drop unneeded variables that start with pwgtp --- must happen before "tolower" command
+
+
+#' ### Data processing
+#' #### Ensure that correct obs. are dropped 
+#+ echo=TRUE, message=FALSE, warning=FALSE
+dt <- dt_raw %>% 
+  filter(wkhp >= hrs_wk) %>% # drop if work less than hrs_wk hours a week
+  filter(wagp != 0) # drop if wagp is 0
+  
+assert_that(min(dt$wkhp) >= hrs_wk) ## ensure that the above drop command worked correctly
 
 
 #' ### Print head of data
 #+ echo=TRUE, message=FALSE, warning=FALSE
 kable(head(dt)) %>%
-  kable_styling() %>%
-  scroll_box(width = "100%")
-
-#' ### Data processing
-#' #### Ensure that correct obs. are dropped 
-#+ echo=TRUE, message=FALSE, warning=FALSE
-dt <- dt[wkhp >= hrs_wk] ## drop observations that work less than hrs_wk hours a week
-assert_that(min(dt$wkhp) >= hrs_wk) ## ensure that the above drop command worked correctly
+kable_styling() %>%
+scroll_box(width = "100%")
 
 
 #' #### All other data processing
@@ -121,7 +125,7 @@ dt <- mutate(dt, military = as.numeric(mil != 4))
 ## recode sex dummy
 dt$sex <- ifelse(dt$sex==1, 0, 1)
 
-## log of wage variables
+## natural log of wage variables
 log_cols <- c("intp", "wagp", "oip", "pap", "semp", "pincp")
 dt <- mutate_at(dt, setNames(log_cols, paste0("log_", log_cols)), log)
 
