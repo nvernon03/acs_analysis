@@ -17,7 +17,8 @@ library(knitr)
 #+ echo=TRUE, message=FALSE, warning=FALSE
 file_name_data <- "data/processed_level-p_jur-us_yr-2016_span-1"
 file_name_function <- "2_analysis/sum_stat_function"
-cont_vars <- c("log_wagp", "log_pincp", 
+cont_vars <- c("log_wagp", "log_pincp", "wagp", "pincp", "log_hr_wagp", 
+               "log_hr_pincp", "log_hr_wagp", "hr_pincp",
                "wkhp", "agep", "exp", "schl_yrs") # continuous variables to analyze
 wd <- Sys.getenv("ACS_DIR") # working directory location
 
